@@ -1,0 +1,558 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>CS 5043: HW6</title>
+</head>
+
+<body>
+<h1>CS 5043: HW6: String Classification</h1>
+
+Assignment notes:
+<ul>
+  <li>  Deadline: Tuesday, April 22nd @11:59pm.
+       <p>
+       
+  </p></li><li> Hand-in procedure: submit a zip file to Gradescope
+       <p>
+       
+  </p></li><li> This work is to be done on your own.   However, you may share
+       solution-specific code snippets in the open on  
+       Slack (only!), but not full solutions.  In addition, downloading
+       solution-specific code is not allowed. 
+       <p>
+       
+  </p></li><li> Do not submit MSWord documents.<p>
+
+</p></li></ul>
+
+<h2>The Problem</h2>
+Proteins are chains of amino acids that perform many different
+biological functions, depending on the specific sequence of amino
+acids.  Families of amino acid chains exhibit similarities in their
+structure and function.  For a new chain, one problem we would like to
+solve is that of predicting the family that it most likely belongs
+to.  In this assignment, we will be classifying amino acid chains as
+one of 46 different families.
+ 
+
+<h3>Data Set</h3>
+
+<ul>
+  <li> 
+The Data set is available on SCHOONER:
+<ul>
+  <li> /home/fagg/datasets/pfam: directory tree containing the data
+       (including tar files).  Note that we are using the
+       <b>pfamB</b> data set.
+       <p>
+</p></li></ul>
+
+</li><li> 
+The data are already partitioned into five independent folds, with the
+classes stratified across the folds (the samples for class k are
+distributed equally across the five folds).  However, the different
+classes have different numbers of examples, with as much as a 1:10
+ratio between the minority and majority classes.  
+
+<p>
+
+</p></li><li> Each example consists of:
+<ul>
+  <li> A tokenized string of length 3934 amino acids.  The 
+       strings in 
+       the data set have been padded on the left hand side.
+       In addition to 
+       the padding token, there is also a token that corresponds to
+       the "unknown" amino acid.  Within each string, there can be long
+       runs of "unknown" tokens.
+       <p>
+
+  </p></li><li> A tokenized class label.  There are 46 different protein
+       families.
+       <p>
+
+</p></li></ul>
+
+<p>
+
+</p></li><li> There are two ways to load the data (provided in pfam_loader.py):
+<ul>
+  <li> <b>prepare_data_set():</b> loads the raw csv data, constructs the
+       train/validation/test data sets, and performs the
+       tokenization.  These files are smaller, but require CPU
+       processing before training.
+       <p>
+
+  </p></li><li> <b>load_rotation():</b> loads an already constructed rotation from a
+       pickle file.  These files are a lot larger, but require no
+       processing once loaded.  I suggest using this approach.
+       <p>
+       
+
+</p></li></ul>
+
+<p>
+Both loaders return the same dictionary format (documented in
+pfam_loader.py).  And, the data sets fit entirely in RAM.  Two
+important properties of this dictionary are:
+</p><ul>
+  <li> n_tokens: the total number of distinct tokens (including the
+       padding and unknown tokens)
+  </li><li> n_classes: the number of distinct PFAM classes in the data set.
+</li></ul>
+
+<p>
+
+</p></li><li> You can
+also use <b>create_tf_datasets()</b> to convert this dictionary 
+representation into TF Datasets, which makes it easy
+to scale batches that will optimally fit with GPU memory.
+<p>
+
+</p></li></ul>
+
+
+<h2>Deep Learning Experiment</h2>
+
+Objective: Compare the performance of three different neural network
+model types that can predict the family of a given amino acid.  Each
+model type be composed of stacks of different recurrent layers:
+
+<p>
+</p><ul>
+  <li> SimpleRNN (or Bidirectional SimpleRNN)
+       <p>
+
+  </p></li><li> <a href="https://towardsdatascience.com/understanding-gru-networks-2ef37df6c9be">Gated Recurrent Units (GRUs)</a>
+       are similar to Long-Short-Term Memories (LSTMs) and behave in a
+       manner that is similar to the RNNs that we have been studying.
+       The key difference is that they are explicitly designed to
+       minimize the number of non-linear layers that gradient
+       information must travel through in order to reach the full
+       input sequence.  As such, they are in a much better position to
+       learn to process longer strings than their SimpleRNN counterparts.
+       <p>
+       The <b>GRU</b> layer class is a drop-in replacement for SimpleRNNs.
+       </p><p>
+
+
+  </p></li><li> <b>Multi-Headed Self Attention</b> short circuits the long
+       sequences by allowing each "hyper-token" to directly access
+       every other token in the sequence.  The interface for this is a
+       bit more involved.  Details are below.
+       <p>
+
+</p></li></ul>
+
+<p>
+
+For my implementation, I have one network building
+function that will generate all three of these model types (I suggest
+the same for you).  Your overall architecture will look like this:
+
+</p><ul>
+  <li> Embedding layer
+       <p>
+
+  </p></li><li> Preprocessing Conv1D layer with striding to reduce the temporal
+       length of the strings
+
+  </li><li> One or more modules composed of:
+       <ul>
+	 <li> SimpleRNN (keras.layers.SimpleRNN) layer or GRU layer
+	      (keras.layers.GRU).  Return sequences is True
+	 </li><li> 1D average pooling
+       </li></ul>
+<p>
+
+  </p></li><li> A final recurrent layer with return sequences set to False
+       <p>
+
+  </p></li><li> One or more Dense layers, with the final output layer using a
+       softmax non-linearity
+       <p>
+
+</p></li></ul>
+
+
+Multi-Headed-Attention network is a more involved architecture:
+
+<ul>
+  <li> Embedding layer
+       <p>
+
+  </p></li><li> PositionalEncoding layer that augments the tokens with position
+       information (use the default 'add' combination type)
+       <p>
+
+  </p></li><li> Preprocessing Conv1D layer with striding to reduce the temporal
+       length of the strings
+
+  </li><li> One or more modules composed of:
+       <ul>
+	 <li> MHA Layers (keras.layers.MultiHeadAttention).  Note
+       that when an instance of this class is "called", it has two
+       arguments (K/V and Q; in this situation, they are the same
+	      tensor for both)
+	 </li><li> 1D average pooling
+       </li></ul>
+<p>
+
+  </p></li><li> A layer that reduces the set of hyper tokens to a single one.
+       You could explicitly clip out one of the tokens from the
+       sequence or use something like GlobalMaxPooling1D
+
+  </li><li> One or more Dense layers, with the final output layer using a
+       softmax non-linearity
+       <p>
+
+</p></li></ul>
+
+
+The precise definition of these is up to you,  but you should stay
+within these classes of solutions.  You should also adjust
+hyper-parameters for each so that they can do 
+their best (with respect to the validation set) without changing model
+architecture.  That said, you should expect some performance
+differences between these model types.
+
+<p>
+
+</p><h2>Model Notes</h2>
+
+<ul>
+  <li> Perform the experiment for rotations 0...4 for all three model
+       types.
+       <p>
+
+  </p></li><li> Each network type should have an Embedding layer.  Embedding
+       layers effectively pre-multiply the 1-hot encoded token with a
+       trainable matrix.  Since the 1-hot encoding has exactly one '1', this
+       multiplication effectively selects a column from the matrix
+       (the EmbeddingLayer is actually more clever than doing a large
+       matrix multiplication).
+       This trainable matrix allows the network to figure out which
+       tokens should share similar representations and which should
+       have very different representations.  The number of embeddings
+       should be less than the number of distinct tokens.
+       <p>
+
+  </p></li><li> Your network should have 46 outputs, one for each class.  Use
+       the softmax() nonlinearity for the final layer.
+       <p>
+
+  </p></li><li> Class labels from the loader are integers (they are not one-hot
+       encoded).  You can either convert the integers to a 1-hot
+       encoded representation and use <b>categorical cross-entropy</b>
+       for your loss, or you can keep the integers and use <b>sparse
+       categorical cross-entropy</b> (this loss function will
+       automatically do the conversion for you).
+       <p>
+       
+  </p></li><li> Likewise, you will need to use <b>sparse categorical
+       accuracy</b> if you are using the raw integers
+       <p>
+       
+</p></li></ul>
+<p>
+
+</p><h2>API Notes</h2>
+
+<h3>Loading Data</h3>
+
+<pre>    dat = load_rotation(basedir=args.dataset, rotation=args.rotation, version=args.version)
+</pre>
+
+<ul>
+  <li> dataset is the pfam directory that you are using
+  </li><li> rotation is an integer
+  </li><li> version should be 'B'
+  </li><li> dat is a dictionary containing the three data sets for this
+       rotation, as well as key meta-data
+       
+</li></ul>
+<p>
+
+</p><h3>Convert to TF Dataset</h3>
+
+Translates the dat structure from load_rotation() into a set of
+three TF Datasets
+
+<pre>    dataset_train, dataset_valid, dataset_test = create_tf_datasets(dat,
+                                                                    batch=batch,
+                                                                    prefetch=args.prefetch,
+                                                                    shuffle=args.shuffle,
+                                                                    repeat=(args.steps_per_epoch is not None))
+</pre>
+
+<ul>
+  <li> Since individual examples are large, I suggest a small batch
+       size (~8)
+</li></ul>
+
+<h3>Embedding Layer</h3>
+
+An embedding layer translates a sequence of integers of some length
+into a sequence of token embeddings. Each integer value corresponds to
+one of the unique tokens.  The length of the strings and the number of
+unique tokens is given by the data set that you load.  The number of
+embeddings should be smaller than the number of unique tokens.
+
+<pre>    tensor = keras.Input(shape=(len,))
+    input_tensor = tensor
+    tensor = keras.layers.Embedding(n_tokens,
+                              n_embeddings,
+                              input_length = len)(tensor)
+
+</pre>
+
+<p>
+
+</p><ul>
+  <li> Input tensor: (batch, len)
+  </li><li> Output tensor shape is: (batch, len, n_embeddings)
+</li></ul>
+
+<h3>Multi-Headed Attention</h3>
+
+<pre>    tensor = keras.layers.MultiHeadAttention(num_heads=num_heads,
+                                         key_dim=head_size)(tensor, tensor)
+</pre>
+
+<ul>
+  <li> num_heads is the number of attention heads to use
+       <p>
+
+  </p></li><li> key_dim is the length of the key/query/value vectors for
+       the individual heads.  This should be small relative to the
+       full state vectors stored in the tensor input
+       
+</li></ul>
+Input and output tensor shape is: (batch, len, embeddings)
+
+
+<h2>Performance Reporting</h2>
+
+
+Once you have selected a reasonable architecture and set of
+hyper-parameters, perform <b>five</b> rotations of experiments.  Be
+careful in your choice of GPU for each model type.
+Produce the
+following figures/results: 
+
+<ol>
+  <li> Figures 0a,b,c: Network architecture from plot_model().  Please
+       include tensor shapes.
+       <p>
+
+  </p></li><li> Figures 1a,b: Training and validation set accuracy as a function of epoch for each rotation (each figure has <b>fifteen</b> curves).
+       <p>
+
+  </p></li><li> Figure 2: Validation set accuracy for the GRU model vs validation set
+       accuracy for the Attention model.  There will be one curve per
+       rotation; each point along the curve represents the performance
+       of the two models for a specific epoch of training.  Because these two models will require different
+       numbers of training epochs, pad the shorter of the two with its
+       final value so that both vectors are the same length.
+<p>
+
+  </p></li><li> Figure 3: Bar graph showing test accuracy for the
+       three different model types (one group of bars for each
+       rotation).  Report these accuracies in text form, too.
+       <p>
+
+
+  </p></li><li> Figure 4: Combining the test data across the five folds, show
+       the contingency table.  Show counts (not percentages).
+       <p>
+       
+  </p></li><li> Reflection:
+       <ol>
+	 <li> Describe the specific choices you made in the model
+	      architectures.  
+	      <p>
+
+	 </p></li><li> Discuss in detail how consistent your model performance
+	      is across the different rotations.
+	      <p>
+
+	 </p></li><li> Discuss the relative performance of the three model types.
+	      <p>
+	      
+	 </p></li><li> Compare and contrast the different models with respect
+	      to the required number of training epochs and the amount
+	      of time required to complete each epoch.  Why does the
+	      third model type require so much compute time for each
+	      epoch?
+	      <p>
+	      
+       </p></li></ol>
+</li></ol>
+
+
+<p></p><hr><p>
+
+</p><h2>Provided Code</h2>
+In <a href="https://symbiotic-computing.org/fagg_html/classes/aml_2025/code/hw6">code for class</a>:
+<ul>
+  <li> pfam_loader.py: data loading and conversion tools
+  </li><li> positional_encoder.py: positional encoder for Attention
+</li></ul>
+
+<p></p><hr><p>
+
+
+</p><h2>Hints</h2>
+
+<ul>
+  <li> The dnn_2025_04 environment does not have GPU support (though it
+       is more up to date).  dnn still has GPU support
+       <p>
+
+  </p></li><li> If you are using the GPU on the supercomputer, you might try
+       unrolling your recurrent layer.  Note that using the GPU and
+       unrolling the network can really help
+       or really hurt, depending on the specifics of library and
+       driver versions. 
+       <p>
+
+  </p></li><li> The training set has ~200K samples in it; this can take a long
+       time to touch all of these samples.  If you want to reduce the
+       number of samples you use for each epoch, turn on <b>repeat</b>
+       in create_tf_datasets() and set steps_per_epcoh in model.fit to
+       the number of batches you want to use per epoch.  You must do both.
+       <p>
+
+  </p></li><li> The dataset is sorted by class, so you can end up with a
+       strange training effect when batching.  So, if you batch, then
+       you should shuffle, too.  I am using a shuffle buffer of 100+.
+       <p>
+       
+  </p></li><li> If you set steps_per_epoch larger than the number of batches in
+       your training set, then training will halt after one epoch.
+       <p>
+       
+  </p></li><li> Turning on caching helps on the GPU (I haven't tested the
+       CPU-only case).  The dataset is small enough to fit in RAM.
+       <p>
+       
+  </p></li><li> It is possible to achieve an accuracy of .995 for independent
+       data with this data set.  A very naive 1-layer SimpleRNN will
+       only be able to achieve a low performance.
+<p>
+
+  </p></li><li> In RNNs, we have very deep models and coupled parameters; you
+       will find that there are some regions 
+       of the error space that have very steep gradients.  I find that
+       RNNs benefit from gradient clipping.  The Adam optimizer has an
+       argument <b>clipnorm</b> that allows you to enable this.  I am
+       using 10^-2 and it is working quite well.
+       
+       <p>
+
+  </p></li><li> You can also pull the pkl version of the datasets from
+       <b>/scratch/fagg/pfam</b>.  Using this will improve start-up
+       time for your jobs.
+       <p>
+  </p></li><li> Be careful to only reserve a GPU if you are actually going to
+       use it.
+       <p>
+
+</p></li></ul>
+
+<p></p><hr><p>
+</p><h2>Network / Training Notes</h2>
+
+Frequent updates here...
+<p>
+
+</p><ul>
+  <li> dnn supports GPUs; dnn_2025_04 does not
+       <p>
+       
+  </p></li><li> So far, I have not had any success with using GPUs with any of
+       the architectures (they either error out or seem to go into
+       infinite loops).  However, I have been running in CPU mode on
+       GPU nodes.  Be careful about your thread and memory usage.
+       <p>
+
+  </p></li><li> The first 1D convolutional layer is really important for making
+       progress.  I am using striding of 16 right now.
+       <p>
+
+  </p></li><li> RNN/GRU models can take a long time show any interesting
+       performance increases.  My GRU networks are requiring 100-150s
+       for each epoch, for about 24 hours before they asymptote.
+       <p>
+
+  </p></li><li> Attention model: I have a model with 167K parameters that is
+       taking ~95s for each training epoch (full data set).  I was
+       able to train up to .94+ (validation) in about 6 hours.
+       <p>
+       
+       
+       
+</p></li></ul>
+
+<p></p><hr><p>
+
+
+
+
+</p><h2>What to Hand In</h2>
+
+Turn in a single zip file that contains:
+
+<ul>
+  <li> All of your python code (.py) and any notebook files (.ipynb)
+  </li><li> All of your text files (.txt)
+  </li><li> Figures + Reflection
+</li></ul>
+
+<p>
+
+Do not turn in pickle files.
+
+
+</p><h2>Grading</h2>
+
+<ul>
+  <li> 20 pts: Clean, general code for model building (including
+       in-code documentation) 
+  </li><li> 10 pts: Figure 0
+  </li><li> 15 pts: Figure 1
+  </li><li> 15 pts: Figure 2
+  </li><li> 15 pts: Figure 3
+  </li><li> 15 pts: Figure 4
+  </li><li> 10 pts: Reasonable test set performance for all rotations for at least one
+       of your model types (.95 accuracy or better)
+</li></ul>
+
+
+<h2>References</h2>
+
+<ul>
+  
+  <li> <a href="http://pfam.xfam.org/">Full Data Set</a>
+
+<p>
+  </p></li><li> Pfam: The protein families database in 2021: J. Mistry,
+       S. Chuguransky, L. Williams, M. Qureshi, G.A. Salazar,
+       E.L.L. Sonnhammer, S.C.E. Tosatto, L. Paladin, S. Raj,
+       L.J. Richardson, R.D. Finn, A. Bateman Nucleic Acids Research
+       (2020) doi: 10.1093/nar/gkaa913   
+       <p>
+
+
+</p></li></ul>
+
+<p></p><hr><p>
+<em><a href="http://symbiotic-computing.org/fagg_html">andrewhfagg -- gmail.com</a></em></p><p>
+
+<font size="-2">
+<!-- hhmts start -->
+Last modified: Mon Apr 14 14:54:42 2025
+<!-- hhmts end -->
+</font>
+
+
+</p></body></html>
