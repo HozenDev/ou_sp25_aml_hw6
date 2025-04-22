@@ -83,7 +83,7 @@ def create_parser():
     parser = argparse.ArgumentParser(description='CNN', fromfile_prefix_chars='@')
 
     # High-level info for WandB
-    parser.add_argument('--project', type=str, default='HW4', help='WandB project name')
+    parser.add_argument('--project', type=str, default='HW6', help='WandB project name')
 
     # High-level commands
     parser.add_argument('--check', action='store_true', help='Check results for completeness')
