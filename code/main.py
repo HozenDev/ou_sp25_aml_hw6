@@ -154,7 +154,7 @@ def execute_exp(args, multi_gpus:int=1):
         rnn_layers.append(rnn_layer)
 
     attention_layers = []
-    for h, kd, p in zip(args.attention_heads, args.key_dim, args.attention_pool):
+    for h, kd, p in zip(args.attention_heads, args.attention_key_dim, args.attention_pool):
         attention_layer = dict()
         attention_layer['attention_heads'] = h
         attention_layer['key_dim'] = kd
