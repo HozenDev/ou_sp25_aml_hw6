@@ -150,7 +150,7 @@ def execute_exp(args, multi_gpus:int=1):
     for i, p in zip(args.rnn_units, args.rnn_pool):
         rnn_layer = dict()
         rnn_layer['units'] = i
-        rnn_layer['pool_size'] = (p,p) if p > 1 else None
+        rnn_layer['pool_size'] = (p) if p > 1 else None
         rnn_layers.append(rnn_layer)
 
     attention_layers = []
@@ -158,7 +158,7 @@ def execute_exp(args, multi_gpus:int=1):
         attention_layer = dict()
         attention_layer['attention_heads'] = h
         attention_layer['key_dim'] = kd
-        attention_layer['pool_size'] = (p,p) if p > 1 else None
+        attention_layer['pool_size'] = (p) if p > 1 else None
         attention_layers.append(attention_layer)
         
     print("Dense layers:", dense_layers)
