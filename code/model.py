@@ -1,5 +1,5 @@
-import keras
-from keras import layers, regularizers
+import tf_keras as keras
+from tf_keras import layers, regularizers
 from positional_encoder import PositionalEncoding
 
 def build_model(model_type: str, input_length: int, n_classes: int,
