@@ -134,8 +134,8 @@ def execute_exp(args, multi_gpus:int=1):
         conv_layer = dict()
         conv_layer['filters'] = f
         conv_layer['kernel_size'] = (s)
-        conv_layer['pool_size'] = (p,p) if p > 1 else None
-        conv_layer['strides'] = (p,p) if p > 1 else None
+        conv_layer['pool_size'] = (p) if p > 1 else None
+        conv_layer['strides'] = (p) if p > 1 else None
         conv_layer['batch_normalization'] = args.batch_normalization
         conv_layers.append(conv_layer)
 
