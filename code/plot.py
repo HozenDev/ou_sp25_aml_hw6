@@ -3,18 +3,20 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-from mesonet_support import extract_station_timeseries, get_mesonet_folds
-import keras
+from sklearn.metrics import confusion_matrix
 
 # Tensorflow
-import tensorflow_probability as tfp
-tfd = tfp.distributions
-
+from tensorflow import keras
+from pfam_loader import *
 from parser import check_args, create_parser
 
 plt.style.use('seaborn-v0_8-muted')
 plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['font.size'] = 14
+
+#######################################
+#            Load Functions           #
+#######################################
 
 def load_trained_model(model_dir, substring_name):
     """
@@ -42,7 +44,6 @@ def load_results_iter(results_dir):
             data = pickle.load(fp)
             yield data
             
-
 def load_results(results_dir):
     """
     Load model results from a directory
@@ -59,148 +60,171 @@ def load_results(results_dir):
 
     return results
 
-def plot_figure2(res, dataset_path, rotation=0, station_indices=[0, 5, 10, 15], window_size=100, output_path='figure_2.png'):
+#######################################
+#          Plotting Functions         #
+#######################################
+
+def plot_accuracy_at_epoch(gru_results, mha_results, epoch, filename="figures/accuracy_at_epoch.png"):
     """
-    Plot Figure 2
+        Plot the accuracy at a specific epoch for GRU and MHA models.
+    
+        :param gru_results: List of dictionaries containing GRU model results
+        :param mha_results: List of dictionaries containing MHA model results
+        :param epoch: The epoch number to plot
+        :param filename: Filename to save the plot
     """
-    _, _, _, _, _, _, test_x, test_y, test_nstations = get_mesonet_folds(
-        dataset_fname=dataset_path, rotation=rotation)
+    # Extract accuracies for the specified epoch
+    nb_rotation = len(gru_results)
+    gru_val_acc = np.zeros(nb_rotation)
+    mha_val_acc = np.zeros(nb_rotation)
 
-    # If pred_mean is scalar, rebuild predictions
-    mu = res['mu']
-    std = res['std']
-    skew = res['skew']
-    tail = res['tail']
-
-    dist = tfd.SinhArcsinh(loc=mu, scale=std, skewness=skew, tailweight=tail)
-    samples = dist.sample(1000).numpy()
-
-    print("samples shape:", samples.shape)
-
-    res['pred_mean'] = np.mean(samples, axis=0)
-    res['percentile_10'] = np.percentile(samples, 10, axis=0)
-    res['percentile_25'] = np.percentile(samples, 25, axis=0)
-    res['percentile_75'] = np.percentile(samples, 75, axis=0)
-    res['percentile_90'] = np.percentile(samples, 90, axis=0)
-    
-    # Unpack predicted values
-    pred_mean = res['mu']
-    p10 = res['percentile_10']
-    p25 = res['percentile_25']
-    p75 = res['percentile_75']
-    p90 = res['percentile_90']
-
-    # Create plot
-    n_stations = len(station_indices)
-    fig, axs = plt.subplots(n_stations, 1, figsize=(12, 3.5 * n_stations), sharex=False)
-
-    print("test_y shape:", test_y.shape)
-    print("test_x shape:", test_x.shape)
-    print("pred_mean shape:", pred_mean.shape)
-    print("p10 shape:", p10.shape)
-    
-    for i, station_idx in enumerate(station_indices):
-        # Extract station time series
-        _, y_station = extract_station_timeseries(test_x, test_y, test_nstations, station_idx)
-        
-        pred_station_mean = pred_mean[station_idx::test_nstations]
-        pred_p10 = p10[station_idx::test_nstations]
-        pred_p25 = p25[station_idx::test_nstations]
-        pred_p75 = p75[station_idx::test_nstations]
-        pred_p90 = p90[station_idx::test_nstations]
-
-        # Use a fixed window from middle of station's time series
-        total_length = len(y_station)
-        mid = total_length // 2
-        start = max(0, mid - window_size // 2)
-        end = min(total_length, start + window_size)
-
-        t = np.arange(end - start)
-        y = y_station[start:end].flatten()
-        mean = pred_station_mean[start:end]
-        p10_vals = pred_p10[start:end]
-        p25_vals = pred_p25[start:end]
-        p75_vals = pred_p75[start:end]
-        p90_vals = pred_p90[start:end]
-
-        ax = axs[i] if n_stations > 1 else axs
-        ax.plot(t, y, label='Observed', color='black', linewidth=2)
-        ax.plot(t, mean, label='Predicted Mean', linestyle='--', color='blue')
-        ax.fill_between(t, p25_vals, p75_vals, alpha=0.4, color='blue', label='25–75%')
-        ax.fill_between(t, p10_vals, p90_vals, alpha=0.2, color='blue', label='10–90%')
-
-        ax.set_ylabel("Rainfall (mm)")
-        ax.set_title(f"Station {station_idx}")
-        ax.grid(True)
-        if i == 0:
-            ax.legend()
-
-    axs[-1].set_xlabel("Time (days)")
-    fig.suptitle("Figure 2: Predicted Rainfall Distribution by Station", fontsize=16)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-    plt.savefig(output_path)
-
-# ------------------------------
-# Figure 3: Scatter plots
-# ------------------------------
-def scatter_plot(x, y, xlabel, ylabel, title, filename):
     plt.figure()
-    plt.scatter(x, y, alpha=0.3, edgecolors='k', s=20)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.title(title)
-    plt.grid(True)
+    
+    for i in range(nb_rotation):
+        gru_val_acc[i] = gru_results[0]['history']['val_sparse_categorical_accuracy'][epoch]
+        mha_val_acc[i] = mha_results[0]['history']['val_sparse_categorical_accuracy'][epoch]
+        plt.plot(gru_val_acc, mha_val_acc, label=f"Rotation {i}")
+        
+    plt.xlabel("GRU Validation Accuracy")
+    plt.ylabel("MHA Validation Accuracy")
+    plt.title(f"Validation Accuracy at Epoch {epoch}")
+    plt.legend()
     plt.savefig(filename)
 
-def plot_param_scatter(all_results):
-    y_true = np.concatenate([r['y_true'] for r in all_results])
+# Figure 3
+def plot_accuracy_bars(rnn_results, gru_results, mha_results, filename="figures/accuracy_bar.png"):
+    gru_test_accuracies = [r['predict_testing_eval'][1] for r in gru_results]
+    mha_test_accuracies = [r['predict_testing_eval'][1] for r in mha_results]
+    rnn_test_accuracies = [r['predict_testing_eval'][1] for r in rnn_results]
 
-    print("mu shape:", all_results[0]['mu'].shape)
-    print("y_true shape:", all_results[0]['y_true'].shape)
-    
-    mu = np.concatenate([r['mu'] for r in all_results])
-    std = np.concatenate([r['std'] for r in all_results])
-    skew = np.concatenate([r['skew'] for r in all_results])
-    tail = np.concatenate([r['tail'] for r in all_results])
-    
-    print(mu.shape, std.shape, skew.shape, tail.shape, y_true.shape)
-
-    scatter_plot(y_true, mu, "Observed RAIN", "Predicted Mean", "Figure 3a: Predicted Mean vs. Observed", "figures/figure_3a.png")
-    scatter_plot(y_true, std, "Observed RAIN", "Predicted Std Dev", "Figure 3b: Std Dev vs. Observed", "figures/figure_3b.png")
-    scatter_plot(y_true, skew, "Observed RAIN", "Predicted Skewness", "Figure 3c: Skewness vs. Observed", "figures/figure_3c.png")
-    scatter_plot(y_true, tail, "Observed RAIN", "Predicted Tailweight", "Figure 3d: Tailweight vs. Observed", "figures/figure_3d.png")
-
-# Figure 4
-def plot_mad_bars(results):
-    rotations = [r['rotation'] for r in results]
-    mad_mean = [r['mad_mean'] for r in results]
-    mad_median = [r['mad_median'] for r in results]
-    mad_zero = [r['mad_zero'] for r in results]
-
-    x = np.arange(len(rotations))
+    nb_rotation = 5
+    x = np.arange(nb_rotation) # Five rotation
     bar_width = 0.10
     width = 0.35
     
     plt.figure()
-    plt.bar(x - width/2, mad_median, bar_width, label="MAD Median")
-    plt.bar(x, mad_mean, bar_width, label="MAD Mean")
-    plt.bar(x + width/2, mad_zero, bar_width, label="MAD Zero")
-    plt.xticks(x, [f"R{r}" for r in range(len(rotations))])
-    plt.ylabel("MAD")
-    plt.title("Figure 4: MAD Across Rotations")
+    plt.bar(x - width/2, rnn_test_accuracies, bar_width, label="RNN")
+    plt.bar(x, gru_test_accuracies, bar_width, label="GRU")
+    plt.bar(x + width/2, mha_test_accuracies, bar_width, label="MHA")
+    plt.xticks(x, [f"R{r}" for r in range(nb_rotation)])
+    plt.ylabel("Sparse Categorical Accuracy")
+    plt.title("Model Accuracy by Rotation")
     plt.legend()
-    plt.savefig("figures/figure_4.png")
+    plt.savefig(filename)
+
+# Figure 4
+def plot_combined_confusion_matrix(args, models, num_classes, class_names, title="Confusion Matrix", filename="figure_4.png"):
+    """
+    Computes and plots a combined confusion matrix from multiple model rotations.
+
+    :params args: Command-line arguments
+    :params models: List of trained models
+    :params num_classes: Number of classes
+    :params class_names: List of class names
+    :params title: Title of the plot
+    :params filename: Filename to save the plot
+    """
+    all_y_true = []
+    all_y_pred = []
+
+    for i, model in enumerate(models):
+
+        dat = load_rotation(basedir=args.dataset, rotation=i, version="B")
+
+        _, _, dataset_test = create_tf_datasets(dat,
+                                                batch=args.batch,
+                                                prefetch=args.prefetch,
+                                                repeat=(args.steps_per_epoch is not None))
+        
+        for x_batch, y_batch in dataset_test:
+            preds = model.predict(x_batch)
+            y_pred = np.argmax(preds, axis=-1)  
+            y_true = y_batch.numpy()            
+
+            all_y_pred.append(y_pred.flatten())
+            all_y_true.append(y_true.flatten())
+            
+    y_true_flat = np.concatenate(all_y_true)
+    y_pred_flat = np.concatenate(all_y_pred)
+
+    labels = list(range(num_classes))
+    cm = confusion_matrix(y_true_flat, y_pred_flat, labels=labels)
+
+    _, ax = plt.subplots(figsize=(8, 6))
+    im = ax.imshow(cm, cmap="Blues")
+
+    plt.title(title)
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.colorbar(im, ax=ax)
+    plt.xticks(np.arange(num_classes), class_names, rotation=45)
+    plt.yticks(np.arange(num_classes), class_names)
+
+    for i in range(num_classes):
+        for j in range(num_classes):
+            ax.text(j, i, f"{cm[i, j]:,}", ha="center", va="center", color="black")
+
+    plt.tight_layout()
+    plt.savefig(filename)
 
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = create_parser()
     args = parser.parse_args()
     check_args(args)
+
+    # Dataset metadata
+    nb_rotation = 5
+    num_classes = 46
+    class_names = [str(i) for i in range(num_classes)]
+    rnn_dir = "./models/rnn_0/"
+    gru_dir = "./models/gru_0/"
+    mha_dir = "./models/mha_0/"
+
+    #######################
+    #     Load Results    #
+    #######################
     
-    all_results = load_results(["./models/exp_v/"])
+    gru_results = load_results([gru_dir])
+    rnn_results = load_results([rnn_dir])
+    mha_results = load_results([mha_dir])
+
+    #######################
+    #     Load Models     #
+    #######################
+
+    rnn_models = []
+    gru_models = []
+    mha_models = []
+
+    for i in range(nb_rotation):
+        try:
+            rnn_model = load_trained_model(rnn_dir, f"rot_0{i}")
+            rnn_models.append(rnn_model)
+        except Exception as e:
+            print(f"Error loading rnn model: {e}")
+        
+        try:
+            gru_model = load_trained_model(gru_dir, f"rot_0{i}")
+            gru_models.append(gru_model)
+        except Exception as e:
+            print(f"Error loading gru model: {e}")
+
+        try:
+            mha_model = load_trained_model(mha_dir, f"rot_0{i}")
+            mha_models.append(mha_model)
+        except Exception as e:
+            print(f"Error loading mha model: {e}")   
 
     print("Plotting results...")
-    plot_figure2(all_results[0], dataset_path=args.dataset, rotation=1, station_indices=[0, 3, 5, 7], window_size=120, output_path='figures/figure_2.png')
-    # plot_param_scatter(all_results)
-    # plot_mad_bars(all_results)
+
+    # Figure 2
+    plot_accuracy_at_epoch(gru_results, mha_results, epoch=10, filename="figures/figure_2.png")
+    
+    # Figure3
+    # plot_accuracy_bars(rnn_results, gru_results, mha_results, filename="figures/figure_3.png")
+    
+    # Figure 4
+    # plot_combined_confusion_matrix(args=args, models=mha_models, class_names=class_names, title="Contingency Table across Folds", filename="figures/figure_4.png", num_classes=num_classes)
+    
     print("Done")

@@ -27,10 +27,6 @@ import matplotlib.pyplot as plt
 import random
 import pickle
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
-from tensorflow import keras
-
 def load_pfam_file(basedir:str,
                    fold:int,
                    version:str='')->pd.DataFrame:
@@ -127,7 +123,7 @@ def prepare_data_set(basedir:str = '/home/fagg/datasets/pfam',
 
     print('tokenize fit...')
     # Convert strings to lists of indices
-    tokenizer = keras.preprocessing.text.Tokenizer(char_level=True,
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(char_level=True,
                                                    filters='\t\n')
     tokenizer.fit_on_texts(dat_out['ins_train'])
 
@@ -136,13 +132,13 @@ def prepare_data_set(basedir:str = '/home/fagg/datasets/pfam',
     for k in dat.keys():
         # Loop over all strings and tokenize
         seq = tokenizer.texts_to_sequences(dat_out['ins_'+k])
-        dat_out['ins_'+k] = pad_sequences(seq, maxlen=len_max)
+        dat_out['ins_'+k] = tf.keras.preprocessing.sequence(seq, maxlen=len_max)
 
     n_tokens = np.max(dat_out['ins_train']) + 2
 
     print('outputs...')
     # Loop over all data sets: create tokenizer for output
-    tokenizer = keras.preprocessing.text.Tokenizer(filters='\t\n')
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='\t\n')
     tokenizer.fit_on_texts(dat_out['outs_train'])
 
     # Tokenize all of the outputs
