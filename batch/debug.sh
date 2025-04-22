@@ -2,7 +2,7 @@
 #
 #SBATCH --partition=debug_gpu
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=20
 #SBATCH --mem=10G
 #SBATCH --output=results/debug/stdout.txt
 #SBATCH --error=results/debug/stderr.txt

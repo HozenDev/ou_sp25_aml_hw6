@@ -7,10 +7,8 @@
 --pool
 1
 --rnn_units
-64
 32
 --rnn_pool
-1
 1
 --hidden
 64
@@ -23,6 +21,6 @@
 --dropout=.3
 --batch_normalization
 --lrate=.0001
---batch=1024
+--batch=128
 --label=NET_GRU
 --model_type=gru

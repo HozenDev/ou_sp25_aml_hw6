@@ -28,6 +28,6 @@ python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/net_gru.txt \
        --exp_index $SLURM_ARRAY_TASK_ID \
        --cpus_per_task $SLURM_CPUS_PER_TASK \
-       --save_model --render \
+       --save_model --render --cache "" \
        --results_path "./results/exp_gru/" \
        -vvv

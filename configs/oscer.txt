@@ -1,4 +1,3 @@
 --gpu
---prefetch=8
+--prefetch=2
 --num_parallel_calls=16
---cache=
