@@ -3,7 +3,7 @@
 #SBATCH --partition=debug_gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=10G
+#SBATCH --mem=20G
 #SBATCH --output=results/debug/stdout.txt
 #SBATCH --error=results/debug/stderr.txt
 #SBATCH --time=00:30:00
@@ -24,9 +24,11 @@ CONFIG_DIR=configs
 ## SHALLOW
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
-       @${CONFIG_DIR}/net_gru.txt --label NET_GRU --model_type "gru" \
+       @${CONFIG_DIR}/net_rnn.txt --label NET_RNN --model_type "rnn" \
        --exp_index 0 \
        --cpus_per_task 32 \
        --save_model --render --cache "" \
-       --results_path "./results/exp/" \
+       --results_path "./results/debug/" \
+       --epoch 2 \
+       --steps_per_epoch 10 \
        -vvv
