@@ -1,5 +1,5 @@
 import keras
-from keras import layers
+from keras import layers, regularizers
 from positional_encoder import PositionalEncoding
 
 def build_model(model_type: str, input_length: int, n_classes: int,
@@ -28,12 +28,15 @@ def build_model(model_type: str, input_length: int, n_classes: int,
     if model_type == 'attention':
         x = PositionalEncoding(max_steps=input_length, max_dims=n_embeddings)(x)
 
+    k_reg = regularizers.l2(reg) if reg else None
+        
     for layer in conv_layers:
+
         x = layers.Conv1D(filters=layer['filters'],
                           kernel_size=layer['kernel_size'],
                           strides=layer['strides'],
                           activation=conv_activation,
-                          kernel_regularizer=reg)(x)
+                          kernel_regularizer=k_reg)(x)
 
     # Model building
     if model_type in ['rnn', 'gru']:
