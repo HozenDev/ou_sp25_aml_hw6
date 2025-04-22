@@ -13,8 +13,8 @@ Semantic labeling of the Chesapeake Bay
 
 # Keras
 import tensorflow as tf
-from tf.keras.utils import plot_model
-from tf.keras.callbacks import EarlyStopping, TerminateOnNaN
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.callbacks import EarlyStopping
 
 # WandB
 import wandb
@@ -200,10 +200,9 @@ def execute_exp(args, multi_gpus:int=1):
                                       monitor=args.monitor)
 
     cbs.append(early_stopping_cb)
-    cbs.append(TerminateOnNaN())
 
     # Weights and Biases
-    wandb_metrics_cb = wandb.keras.WandbCallback()
+    wandb_metrics_cb = wandb.keras.WandbMetricsLogger()
     cbs.append(wandb_metrics_cb)
 
     if args.verbose >= 3:
