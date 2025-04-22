@@ -43,9 +43,8 @@ tfd = tfp.distributions
 tfpl = tfp.layers
 
 # Keras
-import tf_keras as keras
-from tf_keras.utils import plot_model
-from tf_keras.callbacks import EarlyStopping, TerminateOnNaN
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.callbacks import EarlyStopping, TerminateOnNaN
 
 # WandB
 import wandb
