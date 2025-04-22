@@ -1,0 +1,49 @@
+2025-04-22 18:10:37.842459: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:10575] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-04-22 18:10:37.842553: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:479] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-04-22 18:10:37.987226: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1442] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-04-22 18:10:38.001152: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-04-22 18:11:30.312044: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 38367 MB memory:  -> device: 0, name: NVIDIA A100-PCIE-40GB, pci bus id: 0000:21:00.0, compute capability: 8.0
+/home/fagg/miniconda3/envs/dnn/lib/python3.12/site-packages/keras/src/layers/core/embedding.py:90: UserWarning: Argument `input_length` is deprecated. Just remove it.
+  warnings.warn(
+wandb: Currently logged in as: dure0010 (dure0010-university-of-oklahoma). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/cs504305/hw6/wandb/run-20250422_181134-54tly1h2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run NET_MHA_R3
+wandb: ⭐️ View project at https://wandb.ai/dure0010-university-of-oklahoma/HW6
+wandb: 🚀 View run at https://wandb.ai/dure0010-university-of-oklahoma/HW6/runs/54tly1h2
+2025-04-22 18:11:37.544064: I tensorflow/compiler/mlir/tensorflow/utils/dump_mlir_util.cc:268] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+2025-04-22 18:11:38.037385: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8907
+wandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:                            epoch/epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇▇▇██
+wandb:                    epoch/learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:                             epoch/loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch/sparse_categorical_accuracy ▁▆▇█████████████████████████████████████
+wandb:                         epoch/val_loss █▃▂▂▂▂▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  epoch/val_sparse_categorical_accuracy ▁▆▇█████████████████████████████████████
+wandb:                        final_test_loss ▁
+wandb: final_test_sparse_categorical_accuracy ▁
+wandb:                         final_val_loss ▁
+wandb:  final_val_sparse_categorical_accuracy ▁
+wandb: 
+wandb: Run summary:
+wandb:                            epoch/epoch 42
+wandb:                    epoch/learning_rate 0.001
+wandb:                             epoch/loss 0.01644
+wandb:      epoch/sparse_categorical_accuracy 0.99641
+wandb:                         epoch/val_loss 0.01707
+wandb:  epoch/val_sparse_categorical_accuracy 0.99695
+wandb:                        final_test_loss 0.01373
+wandb: final_test_sparse_categorical_accuracy 0.99789
+wandb:                         final_val_loss 0.01313
+wandb:  final_val_sparse_categorical_accuracy 0.99781
+wandb:                               hostname c822.oscer.ou.edu
+wandb: 
+wandb: 🚀 View run NET_MHA_R3 at: https://wandb.ai/dure0010-university-of-oklahoma/HW6/runs/54tly1h2
+wandb: ⭐️ View project at: https://wandb.ai/dure0010-university-of-oklahoma/HW6
+wandb: Synced 5 W&B file(s), 1 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20250422_181134-54tly1h2/logs
