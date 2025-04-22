@@ -23,6 +23,7 @@ CONFIG_DIR=configs
 
 ## SHALLOW
 python ${CODE_DIR}/main.py \
+       @${CONFIG_DIR}/oscer.txt \
        @${CONFIG_DIR}/exp.txt \
        @${CONFIG_DIR}/net_rnn.txt \
        --exp_index $SLURM_ARRAY_TASK_ID \
