@@ -132,7 +132,7 @@ def create_parser():
     # Rnn parameters
     parser.add_argument('--rnn_units', nargs='+', type=int, default=[3, 5], help='Number of RNN units per layer (sequence of ints)')
     parser.add_argument('--activation_rnn', type=str, default='elu', help='Activation function for RNN layers')
-    parser.add_argument('--rnn_pool', nargs='+', type=int, default=[2, 2], help='RNN pooling size (1=None)'))
+    parser.add_argument('--rnn_pool', nargs='+', type=int, default=[2, 2], help='RNN pooling size (1=None)')
 
     # Attention parameters
     parser.add_argument('--attention_heads', nargs='+', type=int, default=[4], help='Number of attention heads per layer (sequence of ints)')
