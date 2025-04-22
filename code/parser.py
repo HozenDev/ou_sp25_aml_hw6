@@ -185,6 +185,7 @@ def create_parser():
     parser.add_argument('--render', action='store_true', default=False , help='Write model image')
     parser.add_argument('--save_model', action='store_true', default=False , help='Save a model file')
     parser.add_argument('--no-save_model', action='store_false', dest='save_model', help='Do not save a model file')
+    parser.add_argument('--version', type=str, default="B", help='Version of the dataset to save')
     
     return parser
 
