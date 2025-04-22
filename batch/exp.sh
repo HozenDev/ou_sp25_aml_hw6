@@ -1,17 +1,18 @@
 #!/bin/bash
 #
-#SBATCH --partition=normal
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=40
-#SBATCH --mem=1G
+#SBATCH --partition=gpu_a100
+##SBATCH -x c860
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=64
+#SBATCH --mem=30G
 #SBATCH --output=results/exp/%j_stdout.txt
 #SBATCH --error=results/exp/%j_stderr.txt
 #SBATCH --time=03:00:00
 #SBATCH --job-name=exp
 #SBATCH --mail-user=Enzo.B.Durel-1@ou.edu
 #SBATCH --mail-type=ALL
-#SBATCH --chdir=/home/cs504305/hw5
-#SBATCH --array=0-7
+#SBATCH --chdir=/home/cs504305/hw6
+##SBATCH --array=0
 
 #################################################
 # Do not change this line unless you have your own python/tensorflow/keras set up
@@ -25,7 +26,8 @@ CONFIG_DIR=configs
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
        @${CONFIG_DIR}/net.txt --label NET_GRU --model_type "rnn" \
-       --exp_index $SLURM_ARRAY_TASK_ID \
+#       --exp_index $SLURM_ARRAY_TASK_ID \
+       --exp_index 0 \
        --cpus_per_task $SLURM_CPUS_PER_TASK \
        --save_model --render --cache "" \
        --results_path "./results/exp/" \
