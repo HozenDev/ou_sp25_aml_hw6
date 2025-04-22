@@ -100,12 +100,12 @@ def execute_exp(args, multi_gpus:int=1):
 
     # Build the model
     conv_layers = []
-    for s, f, p in zip(args.conv_size, args.conv_nfilters, args.pool):
+    for s, f, st, p in zip(args.conv_size, args.conv_nfilters, args.conv_stride, args.pool):
         conv_layer = dict()
         conv_layer['filters'] = f
-        conv_layer['kernel_size'] = (s)
-        conv_layer['pool_size'] = (p) if p > 1 else None
-        conv_layer['strides'] = (p) if p > 1 else None
+        conv_layer['kernel_size'] = s
+        conv_layer['pool_size'] = p if p > 1 else 1
+        conv_layer['strides'] = st if st > 1 else 1
         conv_layer['batch_normalization'] = args.batch_normalization
         conv_layers.append(conv_layer)
 
@@ -120,7 +120,7 @@ def execute_exp(args, multi_gpus:int=1):
     for i, p in zip(args.rnn_units, args.rnn_pool):
         rnn_layer = dict()
         rnn_layer['units'] = i
-        rnn_layer['pool_size'] = (p) if p > 1 else None
+        rnn_layer['pool_size'] = p if p > 1 else 1
         rnn_layers.append(rnn_layer)
 
     attention_layers = []
@@ -128,7 +128,7 @@ def execute_exp(args, multi_gpus:int=1):
         attention_layer = dict()
         attention_layer['attention_heads'] = h
         attention_layer['key_dim'] = kd
-        attention_layer['pool_size'] = (p) if p > 1 else None
+        attention_layer['pool_size'] = p if p > 1 else 1
         attention_layers.append(attention_layer)
         
     print("Dense layers:", dense_layers)
