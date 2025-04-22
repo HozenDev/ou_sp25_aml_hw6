@@ -1,4 +1,4 @@
---dataset=/home/fagg/datasets/mesonet/allData1994_2000.csv
+--dataset=/home/fagg/datasets/pfam
 --Nfolds=8
 --Ntraining=6
 --patience=200
