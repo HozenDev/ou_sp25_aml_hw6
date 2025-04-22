@@ -31,7 +31,7 @@ def build_model(model_type: str, input_length: int, n_classes: int,
     for layer in conv_layers:
         x = layers.Conv1D(filters=layer['filters'],
                           kernel_size=layer['kernel_size'],
-                          strides=layer['stride'],
+                          strides=layer['strides'],
                           activation=conv_activation,
                           kernel_regularizer=reg)(x)
 
