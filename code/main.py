@@ -11,40 +11,9 @@ Semantic labeling of the Chesapeake Bay
 #                           Imports                             #
 #################################################################
 
-from pfam_loader import *
-from positional_encoder import *
-import tensorflow as tf
-
-# Gpus initialization
-gpus = tf.config.experimental.list_physical_devices('GPU')
-n_visible_devices = len(gpus)
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-        print(f"Enabled memory growth for {len(gpus)} GPU(s).")
-    except RuntimeError as e:
-        print(f"Error setting memory growth: {e}")
-
-# Set threading parallelism
-import os
-cpus_per_task = int(os.environ.get("SLURM_CPUS_PER_TASK", 0))
-if cpus_per_task > 1:
-    tf.config.threading.set_intra_op_parallelism_threads(cpus_per_task // 2)
-    tf.config.threading.set_inter_op_parallelism_threads(cpus_per_task // 2)
-
-# Tensorflow
-import tensorflow_probability as tfp
-
-# Sub namespaces that are useful later
-# Tensorflow Distributions
-tfd = tfp.distributions
-# Probability Layers 
-tfpl = tfp.layers
-
 # Keras
 from tensorflow.keras.utils import plot_model
-from tensorflow.keras.callbacks import EarlyStopping, TerminateOnNaN
+from keras.callbacks import EarlyStopping, TerminateOnNaN
 
 # WandB
 import wandb
@@ -59,6 +28,7 @@ from job_control import JobIterator
 from parser import *
 from tools import *
 from model import *
+from pfam_loader import *
 
 #################################################################
 #                 Default plotting parameters                   #
@@ -232,7 +202,7 @@ def execute_exp(args, multi_gpus:int=1):
     cbs.append(TerminateOnNaN())
 
     # Weights and Biases
-    wandb_metrics_cb = wandb.keras.WandbCallback()
+    wandb_metrics_cb = wandb.keras.WandbCallback(log_graph=False)
     cbs.append(wandb_metrics_cb)
 
     if args.verbose >= 3:
@@ -372,11 +342,27 @@ if __name__ == "__main__":
         tf.config.set_visible_devices([], 'GPU')
         print('NO VISIBLE DEVICES!!!!')
 
+    # GPU check
+    visible_devices = tf.config.get_visible_devices('GPU') 
+    n_visible_devices = len(visible_devices)
+    print('GPUS:', visible_devices)
+    if n_visible_devices > 0:
+        for device in visible_devices:
+            tf.config.experimental.set_memory_growth(device, True)
+        print('We have %d GPUs\n'%n_visible_devices)
+    else:
+        print('NO GPU')
+
     if args.check:
         # Just check to see if all experiments have been executed
         check_completeness(args)
     else:
         # Execute the experiment
+
+        # Set number of threads, if it is specified
+        if args.cpus_per_task is not None:
+            tf.config.threading.set_intra_op_parallelism_threads(args.cpus_per_task//2)
+            tf.config.threading.set_inter_op_parallelism_threads(args.cpus_per_task//2)
 
         # Do the work
         execute_exp(args, multi_gpus=n_visible_devices)
