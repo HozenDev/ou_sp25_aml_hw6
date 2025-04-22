@@ -12,7 +12,8 @@ Semantic labeling of the Chesapeake Bay
 #################################################################
 
 # Keras
-from tensorflow.keras.utils import plot_model
+import keras
+from keras.utils import plot_model
 from keras.callbacks import EarlyStopping, TerminateOnNaN
 
 # WandB
