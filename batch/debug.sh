@@ -24,7 +24,7 @@ CONFIG_DIR=configs
 ## SHALLOW
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
-       @${CONFIG_DIR}/net_rnn.txt --label NET_RNN --model_type "rnn" \
+       @${CONFIG_DIR}/net_rnn.txt \
        --exp_index 0 \
        --cpus_per_task 32 \
        --save_model --render --cache "" \
