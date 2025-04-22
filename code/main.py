@@ -113,7 +113,6 @@ def execute_exp(args, multi_gpus:int=1):
     dataset_train, dataset_valid, dataset_test = create_tf_datasets(dat,
                                                                     batch=args.batch,
                                                                     prefetch=args.prefetch,
-                                                                    shuffle=args.shuffle,
                                                                     repeat=(args.steps_per_epoch is not None))
 
     #################################
