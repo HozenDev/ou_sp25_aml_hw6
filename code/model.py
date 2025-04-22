@@ -36,6 +36,7 @@ def build_model(model_type: str, input_length: int, n_classes: int,
                           kernel_size=layer['kernel_size'],
                           strides=layer['strides'],
                           activation=conv_activation,
+                          padding="same",
                           kernel_regularizer=k_reg)(x)
 
     # Model building

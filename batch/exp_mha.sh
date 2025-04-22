@@ -4,10 +4,10 @@
 #SBATCH --cpus-per-task=64
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --output=results/exp/%j_stdout.txt
-#SBATCH --error=results/exp/%j_stderr.txt
-#SBATCH --time=03:00:00
-#SBATCH --job-name=exp
+#SBATCH --output=results/exp_mha/%j_stdout.txt
+#SBATCH --error=results/exp_mha/%j_stderr.txt
+#SBATCH --time=06:00:00
+#SBATCH --job-name=exp_mha
 #SBATCH --mail-user=Enzo.B.Durel-1@ou.edu
 #SBATCH --mail-type=ALL
 #SBATCH --chdir=/home/cs504305/hw6
@@ -24,9 +24,9 @@ CONFIG_DIR=configs
 ## SHALLOW
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
-       @${CONFIG_DIR}/net.txt --label NET_RNN --model_type "rnn" \
+       @${CONFIG_DIR}/net_mha.txt \
        --exp_index $SLURM_ARRAY_TASK_ID \
        --cpus_per_task $SLURM_CPUS_PER_TASK \
        --save_model --render \
-       --results_path "./results/exp/" \
+       --results_path "./results/exp_mha/" \
        -vvv

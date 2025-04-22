@@ -5,5 +5,5 @@
 --min_delta=0.001
 --no_use_py_func
 --project=HW6
---epochs=1000
+--epochs=200
 --steps_per_epoch=100
