@@ -1,5 +1,5 @@
-import keras
-from keras import layers, regularizers
+import tensorflow as tf
+from tf.keras import layers, regularizers
 from positional_encoder import PositionalEncoding
 
 def build_model(model_type: str, input_length: int, n_classes: int,
@@ -17,7 +17,7 @@ def build_model(model_type: str, input_length: int, n_classes: int,
     :param n_classes: Number of output classes
     :return: Compiled keras.Model
     """
-    inputs = keras.Input(shape=(input_length,), name='input_tokens')
+    inputs = tf.keras.Input(shape=(input_length,), name='input_tokens')
 
     # Embedding layer
     x = layers.Embedding(input_dim=n_tokens,
@@ -69,8 +69,8 @@ def build_model(model_type: str, input_length: int, n_classes: int,
     outputs = layers.Dense(n_classes, activation='softmax')(x)
 
     # Compile model
-    model = keras.Model(inputs=inputs, outputs=outputs, name=f"{model_type}_model")
-    model.compile(optimizer=keras.optimizers.Adam(clipnorm=1e-2),
+    model = tf.keras.Model(inputs=inputs, outputs=outputs, name=f"{model_type}_model")
+    model.compile(optimizer=tf.keras.optimizers.Adam(clipnorm=1e-2),
                   loss='sparse_categorical_crossentropy',
                   metrics=['sparse_categorical_accuracy'])
     
