@@ -1,10 +1,9 @@
 --dataset=/home/fagg/datasets/pfam
---Nfolds=8
---Ntraining=6
---patience=200
---batch=16
---min_delta=0.005
+--Ntraining=3
+--patience=10
+--shuffle=200
+--min_delta=0.001
 --no_use_py_func
---project=HW5
+--project=HW6
 --epochs=1000
---steps_per_epoch=1000
+--steps_per_epoch=100

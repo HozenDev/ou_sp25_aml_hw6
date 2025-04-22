@@ -25,10 +25,9 @@ CONFIG_DIR=configs
 ## SHALLOW
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
-       @${CONFIG_DIR}/net.txt --label NET_GRU --model_type "rnn" \
-#       --exp_index $SLURM_ARRAY_TASK_ID \
-       --exp_index 0 \
+       @${CONFIG_DIR}/net_gru.txt --label NET_RNN --model_type "rnn" \
+       --exp_index $SLURM_ARRAY_TASK_ID \
        --cpus_per_task $SLURM_CPUS_PER_TASK \
-       --save_model --render --cache "" \
+       --save_model --render \
        --results_path "./results/exp/" \
        -vvv
