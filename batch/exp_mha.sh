@@ -3,7 +3,7 @@
 #SBATCH --partition=gpu_a100
 #SBATCH --cpus-per-task=64
 #SBATCH --gres=gpu:1
-#SBATCH --mem=80G
+#SBATCH --mem=50G
 #SBATCH --output=results/exp_mha/%j_stdout.txt
 #SBATCH --error=results/exp_mha/%j_stderr.txt
 #SBATCH --time=06:00:00
