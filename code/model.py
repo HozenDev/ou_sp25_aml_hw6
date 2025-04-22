@@ -50,7 +50,7 @@ def build_model(model_type: str, input_length: int, n_classes: int,
 
         x = RNNLayer(units=rnn_layers[-1]['units'],
                      activation=rnn_activation,
-                     return_sequences=True)(x)
+                     return_sequences=False)(x)
     elif model_type == 'attention':
         for layer in attention_layers:
             x = layers.MultiHeadAttention(num_heads=layer['attention_heads'],
