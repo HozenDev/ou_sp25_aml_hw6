@@ -203,7 +203,7 @@ def execute_exp(args, multi_gpus:int=1):
     cbs.append(TerminateOnNaN())
 
     # Weights and Biases
-    wandb_metrics_cb = wandb.keras.WandbEvalCallback()
+    wandb_metrics_cb = wandb.keras.WandbCallback()
     cbs.append(wandb_metrics_cb)
 
     if args.verbose >= 3:
