@@ -29,6 +29,6 @@ python ${CODE_DIR}/main.py \
        --cpus_per_task 32 \
        --save_model --render --cache "" \
        --results_path "./results/debug/" \
-       --epoch 2 \
-       --steps_per_epoch 10 \
+       --epoch 3 \
+       --steps_per_epoch 3 \
        -vvv
