@@ -270,13 +270,20 @@ def execute_exp(args, multi_gpus:int=1):
     # Save results
     fbase = generate_fname(args, args_str)
     results['fname_base'] = fbase
+
+    print("Saving results")
+    
     with open("%s_results.pkl"%(fbase), "wb") as fp:
         pickle.dump(results, fp)
+
+    print("Results saved")
     
     # Save model
     if args.save_model:
         model.save("%s_model.keras"%(fbase))
 
+    print("Model saved to %s_model.keras"%(fbase))
+        
     wandb.finish()
 
     return model
