@@ -229,6 +229,11 @@ def execute_exp(args, multi_gpus:int=1):
     #            Results            #
     #################################
 
+    dataset_train_eval, _, _ = create_tf_datasets(dat,
+                                                  batch=args.batch,
+                                                  prefetch=args.prefetch,
+                                                  repeat=False)
+    
     # Generate results data
     results = {}
 
@@ -255,7 +260,7 @@ def execute_exp(args, multi_gpus:int=1):
     # Training set
     print('#################')
     print('Training')
-    results_predict_training_eval = model.evaluate(dataset_train)
+    results_predict_training_eval = model.evaluate(dataset_train_eval)
     # results['predict_training'] = model.predict(dataset_train)
     # results['predict_training_eval'] = model.evaluate(dataset_train)
 
