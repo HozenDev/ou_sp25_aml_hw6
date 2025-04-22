@@ -26,7 +26,7 @@ python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
        @${CONFIG_DIR}/net.txt --label NET_GRU --model_type "rnn" \
        --exp_index 0 \
-       --cpus_per_task $SLURM_CPUS_PER_TASK \
+       --cpus_per_task 32 \
        --save_model --render --cache "" \
        --results_path "./results/exp/" \
        -vvv
