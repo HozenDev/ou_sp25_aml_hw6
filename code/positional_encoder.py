@@ -76,8 +76,8 @@ class PositionalEncoding(tf.keras.layers.Layer):
         config.update({
             "max_steps": self.positional_embedding.shape[1],
             "max_dims": self.positional_embedding.shape[2],
-            "combination_type": self.combination_type,
-            "dtype": self.dtype.name
+            "combination_type": self.combination_type
+            # "dtype": self.dtype.name
         })
         return config
 
