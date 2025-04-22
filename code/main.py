@@ -263,7 +263,7 @@ def execute_exp(args, multi_gpus:int=1):
     wandb.log({'final_train_sparse_categorical_accuracy': results_predict_training_eval[1]})
 
     # History
-    # results['history'] = history.history
+    results['history'] = history.history
 
     ## NOTE: may want to add some additional logging of test data performance
 
