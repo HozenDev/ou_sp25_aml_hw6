@@ -73,6 +73,6 @@ def build_model(model_type: str, input_length: int, n_classes: int,
     model = tf.keras.Model(inputs=inputs, outputs=outputs, name=f"{model_type}_model")
     model.compile(optimizer=tf.keras.optimizers.Adam(clipnorm=1e-2),
                   loss='sparse_categorical_crossentropy',
-                  metrics=tf.keras.metrics.SparseCategoricalAccuracy())
+                  metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
     
     return model
