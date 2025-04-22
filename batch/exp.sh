@@ -12,7 +12,7 @@
 #SBATCH --mail-user=Enzo.B.Durel-1@ou.edu
 #SBATCH --mail-type=ALL
 #SBATCH --chdir=/home/cs504305/hw6
-##SBATCH --array=0
+#SBATCH --array=0-4
 
 #################################################
 # Do not change this line unless you have your own python/tensorflow/keras set up
@@ -25,7 +25,7 @@ CONFIG_DIR=configs
 ## SHALLOW
 python ${CODE_DIR}/main.py \
        @${CONFIG_DIR}/exp.txt \
-       @${CONFIG_DIR}/net_gru.txt --label NET_RNN --model_type "rnn" \
+       @${CONFIG_DIR}/net.txt --label NET_RNN --model_type "rnn" \
        --exp_index $SLURM_ARRAY_TASK_ID \
        --cpus_per_task $SLURM_CPUS_PER_TASK \
        --save_model --render \

@@ -20,7 +20,7 @@ def exp_type_to_hyperparameters(args) -> dict:
     :return: Hyperparameter set (in dictionary form)
     '''
     if args.exp_type is None:
-        p = {'rotation': range(8)}
+        p = {'rotation': range(5)}
     else:
         assert False, "Unrecognized exp_type (%s)"%args.exp_type
 
