@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --partition=debug_gpu
+#SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=20G
