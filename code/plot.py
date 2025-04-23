@@ -137,8 +137,10 @@ def plot_combined_confusion_matrix(args, models, num_classes, class_names, title
 
         _, _, dataset_test = create_tf_datasets(dat,
                                                 batch=args.batch,
-                                                prefetch=args.prefetch,
-                                                repeat=(args.steps_per_epoch is not None))
+                                                prefetch=args.prefetch)
+
+        # Get the test dataset
+        print(f"Dataset Test Length: {len(dataset_test)}")
         
         for x_batch, y_batch in dataset_test:
             preds = model.predict(x_batch)

@@ -18,7 +18,7 @@
 #+AUTHOR: \newline
 #+AUTHOR: 
 #+EMAIL: /
-#+TITLE: 5043 Advanced Machine Learning - HW 5
+#+TITLE: 5043 Advanced Machine Learning - HW 6
 #+OPTIONS: toc:nil
 
 ** Logo :ignore:
@@ -64,11 +64,23 @@
 #+end_export
 
 * Figures
-** Figure 0
+** Figure 0a
 
-#+caption: Inner model
+#+caption: RNN Model
 #+attr_latex: :height 18cm :float nil
-[[file:./img/figure_0.png]]
+[[file:./img/figure_0a.png]]
+
+** Figure 0b
+
+#+caption: GRU Model
+#+attr_latex: :height 18cm :float nil
+[[file:./img/figure_0b.png]]
+
+** Figure 0c
+
+#+caption: Attention Model
+#+attr_latex: :height 18cm :float nil
+[[file:./img/figure_0c.png]]
 
 ** Figure 1a
 
@@ -84,37 +96,19 @@
 
 ** Figure 2
 
-#+caption: Timestamps examples from different stations
+#+caption: Validation accuracy GRU vs Attention
 #+attr_latex: :width 12cm :float nil
 [[file:./img/figure_2.png]]
 
-** Figure 3a
+** Figure 3
 
-#+caption: Predicted mean
+#+caption: Models Accuracy Across Rotations
 #+attr_latex: :width 12cm :float nil
-[[file:./img/figure_3a.png]]
-
-** Figure 3b
-
-#+caption: Predicted standard deviation
-#+attr_latex: :width 12cm :float nil
-[[file:./img/figure_3b.png]]
-
-** Figure 3c
-
-#+caption: Predicted skewness
-#+attr_latex: :width 12cm :float nil
-[[file:./img/figure_3c.png]]
-
-** Figure 3d
-
-#+caption: Predicted tailweight
-#+attr_latex: :width 12cm :float nil
-[[file:./img/figure_3d.png]]
+[[file:./img/figure_3.png]]
 
 ** Figure 4
 
-#+caption: MAD scores comparaison
+#+caption: MHA Test Contingency Table across the five rotations
 #+attr_latex: :width 12cm :float nil
 [[file:./img/figure_4.png]]
 
