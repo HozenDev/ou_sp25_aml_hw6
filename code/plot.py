@@ -139,16 +139,15 @@ def plot_combined_confusion_matrix(args, models, num_classes, class_names, title
                                                 batch=args.batch,
                                                 prefetch=args.prefetch)
 
-        # Get the test dataset
-        print(f"Dataset Test Length: {len(dataset_test)}")
-        
         for x_batch, y_batch in dataset_test:
-            preds = model.predict(x_batch)
+            preds = model.predict(x_batch, verbose=0)
             y_pred = np.argmax(preds, axis=-1)  
             y_true = y_batch.numpy()            
 
             all_y_pred.append(y_pred.flatten())
             all_y_true.append(y_true.flatten())
+
+        print(f"Rotation {i} done")
             
     y_true_flat = np.concatenate(all_y_true)
     y_pred_flat = np.concatenate(all_y_pred)
@@ -156,22 +155,27 @@ def plot_combined_confusion_matrix(args, models, num_classes, class_names, title
     labels = list(range(num_classes))
     cm = confusion_matrix(y_true_flat, y_pred_flat, labels=labels)
 
-    _, ax = plt.subplots(figsize=(8, 6))
+    square_size = 0.5
+    fig_width = int(square_size * num_classes)
+    fig_height = int(square_size * num_classes)
+
+    _, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = ax.imshow(cm, cmap="Blues")
 
     plt.title(title)
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
     plt.colorbar(im, ax=ax)
-    plt.xticks(np.arange(num_classes), class_names, rotation=45)
-    plt.yticks(np.arange(num_classes), class_names)
+    plt.xticks(np.arange(num_classes), class_names, rotation=90, fontsize=6)
+    plt.yticks(np.arange(num_classes), class_names, fontsize=6)
+
 
     for i in range(num_classes):
         for j in range(num_classes):
             ax.text(j, i, f"{cm[i, j]:,}", ha="center", va="center", color="black")
 
     plt.tight_layout()
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=300)
 
 if __name__ == "__main__":
     # Parse command-line arguments

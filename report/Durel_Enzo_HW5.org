@@ -112,24 +112,6 @@
 #+attr_latex: :width 12cm :float nil
 [[file:./img/figure_4.png]]
 
-** Other Figures
-
-#+caption: MAD Mean Validation
-#+attr_latex: :width 12cm :float nil
-[[file:./img/mad_mean.png]]
-
-#+caption: MAD Median Validation
-#+attr_latex: :width 12cm :float nil
-[[file:./img/val_mad_median.png]]
-
-#+caption: MAD Scores
-#+attr_latex: :width 12cm :float nil
-[[file:./img/mads.png]]
-
-I provided this additional figures, the first and the second figures, show the validation MADs as metrics, could be used as a loss that tend to 0. We can clearly see that the model converge and is consistent because the validation mads decrease as the validation loss decreases too.
-
-We can even see the MAD Scores that the validation MAD median and training MAD median is slightly lower than the MAD zero.
-
 ** newpage :ignore:
 
 #+begin_src latex
@@ -137,33 +119,49 @@ We can even see the MAD Scores that the validation MAD median and training MAD m
 #+end_src
 
 * Analysis & Discussion
-** /"Discuss in detail how consistent your model performance is across the different rotations."/
 
-We can see in figure 1a and figure 1b that for each rotation, the training loss and validation loss decrease similarly. We can see that each loss tend to the same point, around -33 in NLL. We can also see that the curves are pretty stable, the training more than the validation.
+** Describe the specific choices you made in the model architectures.
 
-I used dropout and l2 regularization in my inner model to prevent overfitting. It helps to get very good MADs. We can see in figure 4 each rotation has a MAD median and MAD mean near the MAD zero. This proves stability and consitency in the model across all rotations.
+*** RNN & GRU
 
-** /"Given the time-series plots, describe and explain the shape of the pdf and how it changes with time."/
+The RNN and GRU follow the same architecture. Only the RNN part is replaced with GRU layers. First, we have the embeddings, then we have the convolution as we see in class.
 
-The figure 2 plot shows how the model adjusts the shape of its predicted distribution to match the weather conditions. When the rainfall is 0, the predicted distribution is narrow around zero. As the rainy probability increase, the variance increases too showing the uncertainty in weather forecast.
+About the RNN layers, I only use 1 inner RNN layer with the =return_sequence= parameter as false to keep dimensions. I designed my build model function as we can use as much RNN layers as we want. I firstly testing with one inner layer and it works great so I decided to keep this architecture.
 
-The model tends to predict higher when it's "heavy rain" probably because the inputs is massively composed of 0.
+We always have a "final" RNN layer to make the link with the hidden layers. Then we only have 2 dense layers. Same approach, I begin small and it works well so there was no need to scale up.
 
-** /"Discuss how skewness is used by the model. Is there a consistent variation in this distribution parameter?"/
+*** MHA
 
-The figure 3c shows that the predicted skewness fixed around two tight bands, one at 0.39 and the other at 0.59. The model could not leveraging the skewness parameter dynamically. Maybe, the model determines or preferred other parameters such as deviation or tailweight.
+Concerning the MHA, I follow the same approach. First the embedding layer followed by the positional encoder. Then, the convolutional layer use to "skip" connections.
 
-** /"Discuss how tailweight is used by the model. Is there a consistent variation in this distribution parameter?"/
+There is only one multi head attention layer which was working perfectly so I keep it small too. We've got the average pooling followed by the global pooling to "filter" the parameters.
 
-Like skewness, predicted tailweight is tightly constrained between 9.8 and 10.6. I think the problem here is that, because the data contains a lot of 0, it is hard for the model to get high variation in parameters. We can see this for the tailweighted, but it was the same for the skewness.
+Finally, we've got the same hidden layers as RNN & GRU. Only 2 small layers of size 64 and 32.
 
-** /"Is Sinh-Arcsinh an appropriate distribution for modeling this particular phenomena? Why or why not? (answer in detail)"/
+** Discuss in detail how consistent your model performance is across the different rotations.
 
-Sinh-Arcsinh is appropriate because it supports skewed distribution as the rainfall dataset is. It could helping caputre outlier rainfall events. A possible limitation of the distribution is that the Sinh-Arcsinh distribution is unbounded, allowing for negative values, while rainfall is strictly non-negative. But the model often predicted near-zero means during dry periods, the distribution can technically assign non-zero probability to negative rainfall.
+We can see in figure 1a and 1b that all accuracy curves follow the same tendance independantly of the rotation.
 
-So its practival utility was limited in this experience. Or maybe, I could not achieve a model that could properly compute good parameters and make the Sinh-Arcsinh not well used. However, because of the loss and MADs values, I think that the model is relatively good.
+However, we can see that the RNN layer validation accuracy curves are less stable than the GRU and MHA ones. We can also see that in the rotation 1, the GRU model is "lower" than the other GRU models.
 
-** /"Are your models doing a good job at predicting precipitation? Justify your answer."/
+MHA models are really stable and almost identical.
 
-I think yes, the models are doing a good job at predicting precipitation. The training and validation loss curves show improvement across all 8 rotations, with no sign of overfitting. Also, the MAD for mean and median are both slightly better than the MAD for always predicting zero.
+** Discuss the relative performance of the three model types.
+
+In figure 2, we can that the MHA accuracy is getting quicly better but converge with the GRU accuracies. The GRU accuracy is getting converge slower but get almost the same accuracy at the end.
+
+In figure 3, we can see that all the models have almost the same final accuracy independantly of the rotation. However, we can see that MHA is slightly better in every rotation.
+
+** Compare and contrast the different models with respect to the required number of training epochs and the amount of time required to complete each epoch. Why does the third model type require so much compute time for each epoch? 
+
+For each models, I used steps per epoch equal to 100.
+
+For RNN layer, I've got in average, 37s per epoch.
+For GRU layer, I've got in average, 14s per epoch.
+For MHA layer, I've got in average, 10s per epoch.
+
+Moreover, the GRU and RNN layers needs more epochs to get the almost the same accuracy of the MHA model which can only take a 20 of epochs.
+
+In conlusion, it seems that the MHA model is better in every aspect compared to the simple RNN and GRU models. 
+
 
