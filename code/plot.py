@@ -64,35 +64,39 @@ def load_results(results_dir):
 #          Plotting Functions         #
 #######################################
 
-def plot_accuracy_at_epoch(gru_results, mha_results, epoch, filename="figures/accuracy_at_epoch.png"):
+# Figure 2
+def plot_accuracy_curves(gru_results, mha_results, filename="figures/accuracy_vs_accuracy.png"):
     """
-        Plot the accuracy at a specific epoch for GRU and MHA models.
-    
-        :param gru_results: List of dictionaries containing GRU model results
-        :param mha_results: List of dictionaries containing MHA model results
-        :param epoch: The epoch number to plot
-        :param filename: Filename to save the plot
+    Plot validation accuracy curves: GRU vs MHA model per rotation.
     """
-    # Extract accuracies for the specified epoch
     nb_rotation = len(gru_results)
-    gru_val_acc = np.zeros(nb_rotation)
-    mha_val_acc = np.zeros(nb_rotation)
 
     plt.figure()
-    
+
     for i in range(nb_rotation):
-        gru_val_acc[i] = gru_results[0]['history']['val_sparse_categorical_accuracy'][epoch]
-        mha_val_acc[i] = mha_results[0]['history']['val_sparse_categorical_accuracy'][epoch]
-        plt.plot(gru_val_acc, mha_val_acc, label=f"Rotation {i}")
-        
+        gru_acc = gru_results[i]['history']['val_sparse_categorical_accuracy']
+        mha_acc = mha_results[i]['history']['val_sparse_categorical_accuracy']
+
+        # Pad the shorter sequence with its final value
+        max_len = max(len(gru_acc), len(mha_acc))
+        if len(gru_acc) < max_len:
+            gru_acc += [gru_acc[-1]] * (max_len - len(gru_acc))
+        if len(mha_acc) < max_len:
+            mha_acc += [mha_acc[-1]] * (max_len - len(mha_acc))
+
+        plt.plot(gru_acc, mha_acc, label=f"Rotation {i}")
+
     plt.xlabel("GRU Validation Accuracy")
-    plt.ylabel("MHA Validation Accuracy")
-    plt.title(f"Validation Accuracy at Epoch {epoch}")
+    plt.ylabel("Attention Validation Accuracy")
+    plt.title("Validation Accuracy GRU vs Attention")
     plt.legend()
     plt.savefig(filename)
 
 # Figure 3
 def plot_accuracy_bars(rnn_results, gru_results, mha_results, filename="figures/accuracy_bar.png"):
+    """
+    Plot models accuracy bars
+    """
     gru_test_accuracies = [r['predict_testing_eval'][1] for r in gru_results]
     mha_test_accuracies = [r['predict_testing_eval'][1] for r in mha_results]
     rnn_test_accuracies = [r['predict_testing_eval'][1] for r in rnn_results]
@@ -179,7 +183,7 @@ if __name__ == "__main__":
     class_names = [str(i) for i in range(num_classes)]
     rnn_dir = "./models/rnn_0/"
     gru_dir = "./models/gru_0/"
-    mha_dir = "./models/mha_0/"
+    mha_dir = "./models/mha_1/"
 
     #######################
     #     Load Results    #
@@ -219,12 +223,12 @@ if __name__ == "__main__":
     print("Plotting results...")
 
     # Figure 2
-    plot_accuracy_at_epoch(gru_results, mha_results, epoch=10, filename="figures/figure_2.png")
+    plot_accuracy_curves(gru_results, mha_results, filename="figures/figure_2.png")
     
-    # Figure3
-    # plot_accuracy_bars(rnn_results, gru_results, mha_results, filename="figures/figure_3.png")
+    # Figure 3
+    plot_accuracy_bars(rnn_results, gru_results, mha_results, filename="figures/figure_3.png")
     
     # Figure 4
-    # plot_combined_confusion_matrix(args=args, models=mha_models, class_names=class_names, title="Contingency Table across Folds", filename="figures/figure_4.png", num_classes=num_classes)
+    plot_combined_confusion_matrix(args=args, models=mha_models, class_names=class_names, title="Contingency Table across Folds", filename="figures/figure_4.png", num_classes=num_classes)
     
     print("Done")
