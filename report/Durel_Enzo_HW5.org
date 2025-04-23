@@ -84,14 +84,14 @@
 
 ** Figure 1a
 
-#+caption: Training Loss
-#+attr_latex: :width 12cm :float nil
+#+caption: Training Sparse Categorical Accuracy
+#+attr_latex: :width 14cm :float nil
 [[file:./img/figure_1a.png]]
 
 ** Figure 1b
 
-#+caption: Validation Loss
-#+attr_latex: :width 12cm :float nil
+#+caption: Validation Sparse Categorical Accuracy
+#+attr_latex: :width 14cm :float nil
 [[file:./img/figure_1b.png]]
 
 ** Figure 2

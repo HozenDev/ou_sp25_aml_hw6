@@ -178,6 +178,8 @@ def plot_combined_confusion_matrix(args, models, num_classes, class_names, title
     plt.savefig(filename, dpi=300)
 
 if __name__ == "__main__":
+    print("Plot initialization...")
+
     # Parse command-line arguments
     parser = create_parser()
     args = parser.parse_args()
@@ -194,6 +196,8 @@ if __name__ == "__main__":
     #######################
     #     Load Results    #
     #######################
+
+    print("Loading results...")
     
     gru_results = load_results([gru_dir])
     rnn_results = load_results([rnn_dir])
@@ -203,6 +207,8 @@ if __name__ == "__main__":
     #     Load Models     #
     #######################
 
+    print("Loading models...")
+    
     rnn_models = []
     gru_models = []
     mha_models = []
