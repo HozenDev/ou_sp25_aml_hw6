@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-#SBATCH --partition=normal
-#SBATCH --ntasks=1
+#SBATCH --partition=debug_gpu
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=40
-#SBATCH --mem=10G
+#SBATCH --mem=20G
 #SBATCH --output=results/plot/%j_stdout.txt
 #SBATCH --error=results/plot/%j_stderr.txt
-#SBATCH --time=00:10:00
+#SBATCH --time=00:30:00
 #SBATCH --job-name=plot
 #SBATCH --mail-user=Enzo.B.Durel-1@ou.edu
 #SBATCH --mail-type=ALL
