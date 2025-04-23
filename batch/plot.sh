@@ -24,4 +24,4 @@ CONFIG_DIR=configs
 python ${CODE_DIR}/plot.py \
        @${CONFIG_DIR}/oscer.txt \
        @${CONFIG_DIR}/exp.txt \
-       --results_path "./results/exp/" \
+       --results_path "./results/plot/" \
