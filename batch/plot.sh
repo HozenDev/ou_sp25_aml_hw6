@@ -1,16 +1,16 @@
 #!/bin/bash
 #
-#SBATCH --partition=debug_5min
+#SBATCH --partition=normal
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=40
-#SBATCH --mem=1G
+#SBATCH --mem=10G
 #SBATCH --output=results/plot/%j_stdout.txt
 #SBATCH --error=results/plot/%j_stderr.txt
 #SBATCH --time=00:10:00
 #SBATCH --job-name=plot
 #SBATCH --mail-user=Enzo.B.Durel-1@ou.edu
 #SBATCH --mail-type=ALL
-#SBATCH --chdir=/home/cs504305/hw5
+#SBATCH --chdir=/home/cs504305/hw6
 
 #################################################
 # Do not change this line unless you have your own python/tensorflow/keras set up
@@ -22,5 +22,6 @@ CONFIG_DIR=configs
 
 ## SHALLOW
 python ${CODE_DIR}/plot.py \
-       @${CONFIG_DIR}/exp.txt @${CONFIG_DIR}/net.txt \
+       @${CONFIG_DIR}/oscer.txt \
+       @${CONFIG_DIR}/exp.txt \
        --results_path "./results/exp/" \
